@@ -4,6 +4,8 @@ package com.example.studentsmanaged.controllers;
 import com.example.studentsmanaged.models.Student;
 import com.example.studentsmanaged.service.StudentService;
 import com.example.studentsmanaged.util.StudentManagementException;
+import com.example.studentsmanaged.util.ThreadUtil;
+import com.example.studentsmanaged.util.ValidationUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -20,7 +22,6 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class StudentController {
 
@@ -63,7 +64,7 @@ public class StudentController {
     public StudentController() {
         this.studentService = new StudentService();
         this.studentList = FXCollections.observableArrayList();
-        this.executorService = Executors.newFixedThreadPool(2);
+        this.executorService = ThreadUtil.getUIExecutor();
     }
 
     @FXML
@@ -118,7 +119,7 @@ public class StudentController {
         });
 
         task.setOnFailed(e -> {
-            showAlert(AlertType.ERROR, "Error", "Failed to load students", task.getException().getMessage());
+            showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Error", "Failed to load students", task.getException().getMessage());
         });
 
         executorService.submit(task);
@@ -142,14 +143,22 @@ public class StudentController {
         try {
             // Create a student object from form fields
             Student student = new Student();
-            student.setId(txtId.getText().trim());
-            student.setName(txtName.getText().trim());
-            student.setCourse(txtCourse.getText().trim());
 
+            // Validate and set student data
             try {
-                student.setGrade(Double.parseDouble(txtGrade.getText().trim()));
-            } catch (NumberFormatException e) {
-                showAlert(AlertType.ERROR, "Validation Error", "Invalid Grade", "Grade must be a number");
+                ValidationUtil.validateStudentId(txtId.getText().trim());
+                student.setId(txtId.getText().trim());
+
+                ValidationUtil.validateName(txtName.getText().trim());
+                student.setName(txtName.getText().trim());
+
+                ValidationUtil.validateCourse(txtCourse.getText().trim());
+                student.setCourse(txtCourse.getText().trim());
+
+                double grade = ValidationUtil.validateGrade(txtGrade.getText().trim());
+                student.setGrade(grade);
+            } catch (StudentManagementException e) {
+                showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Validation Error", "Invalid Input", e.getMessage());
                 return;
             }
 
@@ -162,10 +171,10 @@ public class StudentController {
             // Clear form
             clearForm();
 
-            showAlert(AlertType.INFORMATION, "Success", "Student Added", "Student was added successfully");
+            showAlert(javafx.scene.control.Alert.AlertType.INFORMATION, "Success", "Student Added", "Student was added successfully");
 
         } catch (StudentManagementException e) {
-            showAlert(AlertType.ERROR, "Error", "Failed to add student", e.getMessage());
+            showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Error", "Failed to add student", e.getMessage());
         }
     }
 
@@ -176,18 +185,22 @@ public class StudentController {
             Student selectedStudent = tableStudents.getSelectionModel().getSelectedItem();
 
             if (selectedStudent == null) {
-                showAlert(AlertType.ERROR, "Error", "No Student Selected", "Please select a student to update");
+                showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Error", "No Student Selected", "Please select a student to update");
                 return;
             }
 
-            // Update student object from form fields
-            selectedStudent.setName(txtName.getText().trim());
-            selectedStudent.setCourse(txtCourse.getText().trim());
-
+            // Validate and update student object from form fields
             try {
-                selectedStudent.setGrade(Double.parseDouble(txtGrade.getText().trim()));
-            } catch (NumberFormatException e) {
-                showAlert(AlertType.ERROR, "Validation Error", "Invalid Grade", "Grade must be a number");
+                ValidationUtil.validateName(txtName.getText().trim());
+                selectedStudent.setName(txtName.getText().trim());
+
+                ValidationUtil.validateCourse(txtCourse.getText().trim());
+                selectedStudent.setCourse(txtCourse.getText().trim());
+
+                double grade = ValidationUtil.validateGrade(txtGrade.getText().trim());
+                selectedStudent.setGrade(grade);
+            } catch (StudentManagementException e) {
+                showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Validation Error", "Invalid Input", e.getMessage());
                 return;
             }
 
@@ -200,10 +213,10 @@ public class StudentController {
             // Clear form
             clearForm();
 
-            showAlert(AlertType.INFORMATION, "Success", "Student Updated", "Student was updated successfully");
+            showAlert(javafx.scene.control.Alert.AlertType.INFORMATION, "Success", "Student Updated", "Student was updated successfully");
 
         } catch (StudentManagementException e) {
-            showAlert(AlertType.ERROR, "Error", "Failed to update student", e.getMessage());
+            showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Error", "Failed to update student", e.getMessage());
         }
     }
 
@@ -214,7 +227,7 @@ public class StudentController {
             Student selectedStudent = tableStudents.getSelectionModel().getSelectedItem();
 
             if (selectedStudent == null) {
-                showAlert(AlertType.ERROR, "Error", "No Student Selected", "Please select a student to delete");
+                showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Error", "No Student Selected", "Please select a student to delete");
                 return;
             }
 
@@ -227,10 +240,10 @@ public class StudentController {
             // Clear form
             clearForm();
 
-            showAlert(AlertType.INFORMATION, "Success", "Student Deleted", "Student was deleted successfully");
+            showAlert(javafx.scene.control.Alert.AlertType.INFORMATION, "Success", "Student Deleted", "Student was deleted successfully");
 
         } catch (StudentManagementException e) {
-            showAlert(AlertType.ERROR, "Error", "Failed to delete student", e.getMessage());
+            showAlert(javafx.scene.control.Alert.AlertType.ERROR, "Error", "Failed to delete student", e.getMessage());
         }
     }
 
@@ -246,10 +259,10 @@ public class StudentController {
         if (file != null) {
             studentService.exportToCSVAsync(file.getAbsolutePath(), success -> {
                 if (success) {
-                    showAlertLater(AlertType.INFORMATION, "Success", "Export Successful",
+                    showAlertLater(javafx.scene.control.Alert.AlertType.INFORMATION, "Success", "Export Successful",
                             "Students were exported to CSV successfully");
                 } else {
-                    showAlertLater(AlertType.ERROR, "Error", "Export Failed",
+                    showAlertLater(javafx.scene.control.Alert.AlertType.ERROR, "Error", "Export Failed",
                             "Failed to export students to CSV");
                 }
             });
@@ -272,8 +285,8 @@ public class StudentController {
                         // Add imported students to database
                         for (Student student : students) {
                             try {
-                                if (!studentService.getAllStudents().stream()
-                                        .anyMatch(s -> s.getId().equals(student.getId()))) {
+                                if (studentService.getAllStudents().stream()
+                                        .noneMatch(s -> s.getId().equals(student.getId()))) {
                                     studentService.addStudent(student);
                                     studentList.add(student);
                                 }
@@ -282,10 +295,10 @@ public class StudentController {
                             }
                         }
 
-                        showAlert(AlertType.INFORMATION, "Success", "Import Successful",
+                        showAlert(javafx.scene.control.Alert.AlertType.INFORMATION, "Success", "Import Successful",
                                 "Imported " + students.size() + " students");
                     } else {
-                        showAlert(AlertType.WARNING, "Warning", "Import Result",
+                        showAlert(javafx.scene.control.Alert.AlertType.WARNING, "Warning", "Import Result",
                                 "No students were imported");
                     }
                 });
@@ -294,8 +307,8 @@ public class StudentController {
     }
 
     // Show alert on JavaFX application thread
-    private void showAlertLater(AlertType type, String title, String header, String content) {
-        javafx.application.Platform.runLater(() -> showAlert(type, title, header, content));
+    private void showAlertLater(javafx.scene.control.Alert.AlertType type, String title, String header, String content) {
+        ThreadUtil.runOnFXThread(() -> showAlert(type, title, header, content));
     }
 
     // Show alert
@@ -310,6 +323,6 @@ public class StudentController {
     // Clean up resources
     public void cleanup() {
         studentService.shutdown();
-        executorService.shutdown();
+        // No need to shutdown our executorService as it's shared with ThreadUtil
     }
 }

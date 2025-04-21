@@ -1,13 +1,14 @@
 package com.example.studentsmanaged;
 
 import com.example.studentsmanaged.controllers.StudentController;
+import com.example.studentsmanaged.util.ThreadUtil;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import java.net.URL;
+import java.util.Objects;
 
 public class StudentsManagedApp extends Application {
 
@@ -16,43 +17,16 @@ public class StudentsManagedApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Print for debugging
-            System.out.println("Looking for FXML file...");
-            URL fxmlLocation = getClass().getResource("/com/example/studentsmanaged/StudentView.fxml");
-            System.out.println("FXML Location: " + fxmlLocation);
-            
-            if (fxmlLocation == null) {
-                fxmlLocation = getClass().getResource("StudentView.fxml");
-                System.out.println("Alternative FXML Location: " + fxmlLocation);
-            }
-            
-            if (fxmlLocation == null) {
-                throw new IllegalStateException("Cannot find the FXML file. Make sure the file exists in the resources directory.");
-            }
-            
-            FXMLLoader loader = new FXMLLoader(fxmlLocation);
-            
             // Load the FXML file
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/studentsmanaged/StudentView.fxml"));
             Parent root = loader.load();
 
             // Get the controller
             controller = loader.getController();
-            System.out.println("Controller loaded: " + (controller != null));
 
             // Set up the scene
             Scene scene = new Scene(root);
-            
-            // Try different possible CSS locations
-            URL cssLocation = getClass().getResource("/com/example/studentsmanaged/css/styles.css");
-            if (cssLocation == null) {
-                cssLocation = getClass().getResource("styles.css");
-            }
-            
-            if (cssLocation != null) {
-                scene.getStylesheets().add(cssLocation.toExternalForm());
-            } else {
-                System.out.println("Warning: CSS file not found");
-            }
+            scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("/com/example/studentsmanaged/css/styles.css")).toExternalForm());
 
             // Set up the stage
             primaryStage.setTitle("Student Management System");
@@ -72,9 +46,7 @@ public class StudentsManagedApp extends Application {
             });
 
         } catch (Exception e) {
-            System.out.println("Error in start method:");
             e.printStackTrace();
-            Platform.exit();
         }
     }
 
@@ -83,6 +55,8 @@ public class StudentsManagedApp extends Application {
         if (controller != null) {
             controller.cleanup();
         }
+        // Shutdown all thread pools
+        ThreadUtil.shutdownAll();
         Platform.exit();
     }
 

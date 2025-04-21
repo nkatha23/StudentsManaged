@@ -1,6 +1,7 @@
 package com.example.studentsmanaged.database;
 
 import com.example.studentsmanaged.models.Student;
+import com.example.studentsmanaged.util.LoggerUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,8 +10,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-//This is how we connect to the database and perform CRUD operations
 public class StudentDAO {
     // Database connection
     private final DatabaseConnection dbConnection;
@@ -23,6 +22,7 @@ public class StudentDAO {
     // Add a student to the database
     public boolean addStudent(Student student) {
         String sql = "INSERT INTO students (id, name, course, grade) VALUES (?, ?, ?, ?)";
+        LoggerUtil.debug("StudentDAO", "Adding student with ID: " + student.getId());
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -37,10 +37,18 @@ public class StudentDAO {
             pstmt.setDouble(4, student.getGrade());
 
             int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                LoggerUtil.info("StudentDAO", "Student added successfully: " + student.getId());
+            } else {
+                LoggerUtil.warning("StudentDAO", "No rows affected when adding student: " + student.getId());
+            }
+
+            return success;
 
         } catch (SQLException e) {
-            System.err.println("Error adding student: " + e.getMessage());
+            LoggerUtil.error("StudentDAO", "Error adding student: " + student.getId(), e);
             return false;
         } finally {
             dbConnection.closeResources(conn, pstmt, null);
@@ -50,6 +58,7 @@ public class StudentDAO {
     // Update a student in the database
     public boolean updateStudent(Student student) {
         String sql = "UPDATE students SET name = ?, course = ?, grade = ? WHERE id = ?";
+        LoggerUtil.debug("StudentDAO", "Updating student with ID: " + student.getId());
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -64,10 +73,18 @@ public class StudentDAO {
             pstmt.setString(4, student.getId());
 
             int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                LoggerUtil.info("StudentDAO", "Student updated successfully: " + student.getId());
+            } else {
+                LoggerUtil.warning("StudentDAO", "No rows affected when updating student: " + student.getId());
+            }
+
+            return success;
 
         } catch (SQLException e) {
-            System.err.println("Error updating student: " + e.getMessage());
+            LoggerUtil.error("StudentDAO", "Error updating student: " + student.getId(), e);
             return false;
         } finally {
             dbConnection.closeResources(conn, pstmt, null);
@@ -77,6 +94,7 @@ public class StudentDAO {
     // Delete a student from the database
     public boolean deleteStudent(String id) {
         String sql = "DELETE FROM students WHERE id = ?";
+        LoggerUtil.debug("StudentDAO", "Deleting student with ID: " + id);
 
         Connection conn = null;
         PreparedStatement pstmt = null;
@@ -88,10 +106,18 @@ public class StudentDAO {
             pstmt.setString(1, id);
 
             int rowsAffected = pstmt.executeUpdate();
-            return rowsAffected > 0;
+            boolean success = rowsAffected > 0;
+
+            if (success) {
+                LoggerUtil.info("StudentDAO", "Student deleted successfully: " + id);
+            } else {
+                LoggerUtil.warning("StudentDAO", "No rows affected when deleting student: " + id);
+            }
+
+            return success;
 
         } catch (SQLException e) {
-            System.err.println("Error deleting student: " + e.getMessage());
+            LoggerUtil.error("StudentDAO", "Error deleting student: " + id, e);
             return false;
         } finally {
             dbConnection.closeResources(conn, pstmt, null);

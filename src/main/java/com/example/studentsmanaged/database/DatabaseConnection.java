@@ -1,5 +1,7 @@
 package com.example.studentsmanaged.database;
 
+import com.example.studentsmanaged.util.LoggerUtil;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,10 +10,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DatabaseConnection {
-    // Database URL for our students data
+    // Database URL
     private static final String DB_URL = "jdbc:sqlite:students.db";
 
-    // Singleton instance of this database connection(ensyring only one instance of database connection)
+    // Singleton instance
     private static DatabaseConnection instance;
 
     // Get singleton instance
@@ -24,11 +26,13 @@ public class DatabaseConnection {
 
     // Private constructor for singleton pattern
     private DatabaseConnection() {
+        LoggerUtil.info("DatabaseConnection", "Initializing database connection");
         initializeDatabase();
     }
 
     // Initialize database and create tables if they don't exist
     private void initializeDatabase() {
+        LoggerUtil.info("DatabaseConnection", "Creating/checking database tables");
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
@@ -41,10 +45,10 @@ public class DatabaseConnection {
                     ");";
 
             stmt.execute(sql);
-            System.out.println("Database initialized successfully");
+            LoggerUtil.info("DatabaseConnection", "Database initialized successfully");
 
         } catch (SQLException e) {
-            System.err.println("Error initializing database: " + e.getMessage());
+            LoggerUtil.error("DatabaseConnection", "Error initializing database", e);
         }
     }
 
@@ -60,7 +64,7 @@ public class DatabaseConnection {
             if (pstmt != null) pstmt.close();
             if (conn != null) conn.close();
         } catch (SQLException e) {
-            System.err.println("Error closing resources: " + e.getMessage());
+            LoggerUtil.error("DatabaseConnection", "Error closing resources", e);
         }
     }
 }

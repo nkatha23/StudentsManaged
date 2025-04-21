@@ -4,10 +4,11 @@ import com.example.studentsmanaged.database.StudentDAO;
 import com.example.studentsmanaged.models.Student;
 import com.example.studentsmanaged.util.FileHandler;
 import com.example.studentsmanaged.util.StudentManagementException;
+import com.example.studentsmanaged.util.ThreadUtil;
+import com.example.studentsmanaged.util.ValidationUtil;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 
@@ -18,8 +19,8 @@ public class StudentService {
     // Constructor
     public StudentService() {
         this.studentDAO = new StudentDAO();
-        // Create a thread pool with a fixed number of threads
-        this.executorService = Executors.newFixedThreadPool(5);
+        // Use the thread utility for file operations
+        this.executorService = ThreadUtil.getFileExecutor();
     }
 
     // Validate student data
@@ -28,21 +29,11 @@ public class StudentService {
             throw StudentManagementException.validationError("Student cannot be null");
         }
 
-        if (student.getId() == null || student.getId().trim().isEmpty()) {
-            throw StudentManagementException.validationError("Student ID cannot be empty");
-        }
-
-        if (student.getName() == null || student.getName().trim().isEmpty()) {
-            throw StudentManagementException.validationError("Student name cannot be empty");
-        }
-
-        if (student.getCourse() == null || student.getCourse().trim().isEmpty()) {
-            throw StudentManagementException.validationError("Course cannot be empty");
-        }
-
-        if (student.getGrade() < 0 || student.getGrade() > 100) {
-            throw StudentManagementException.validationError("Grade must be between 0 and 100");
-        }
+        // Use the validation utility methods
+        ValidationUtil.validateStudentId(student.getId());
+        ValidationUtil.validateName(student.getName());
+        ValidationUtil.validateCourse(student.getCourse());
+        ValidationUtil.validateGrade(student.getGrade());
     }
 
     // Add a student
