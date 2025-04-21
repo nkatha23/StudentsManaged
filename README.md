@@ -84,13 +84,12 @@ mvn javafx:run
 
 The project follows a standard package structure:
 
-- `com.sms`: Root package
-- `com.sms.controller`: UI controllers
-- `com.sms.db`: Database-related classes
-- `com.sms.exception`: Custom exception classes
-- `com.sms.model`: Data model classes
-- `com.sms.service`: Business logic services
-- `com.sms.util`: Utility classes
+- `com.studentsmanaged`: Root package
+- `com.studentsmanaged.controllers`: UI controllers
+- `com.studentsmanaged.database`: Database-related classes
+- `com.studentsmanaged.models`: Data model classes
+- `com.studentsmanaged.service`: Business logic services
+- `com.studentsmanaged.util`: Utility classes and custom exception classes
 
 ## Database Schema
 
