@@ -1,0 +1,10 @@
+2025-04-25 09:06:58.396 [INFO] DatabaseConnection: Initializing database connection
+2025-04-25 09:06:58.396 [INFO] DatabaseConnection: Creating/checking database tables
+2025-04-25 09:06:58.903 [INFO] DatabaseConnection: Database initialized successfully
+2025-04-25 13:55:42.503 [INFO] DatabaseConnection: Initializing database connection
+2025-04-25 13:55:42.503 [INFO] DatabaseConnection: Creating/checking database tables
+2025-04-25 13:55:42.894 [INFO] DatabaseConnection: Database initialized successfully
+2025-04-25 15:19:26.147 [DEBUG] StudentDAO: Adding student with ID: 3664
+2025-04-25 15:19:26.182 [INFO] StudentDAO: Student added successfully: 3664
+2025-04-25 15:23:08.785 [DEBUG] StudentDAO: Adding student with ID: Sharon
+2025-04-25 15:23:08.812 [INFO] StudentDAO: Student added successfully: Sharon
